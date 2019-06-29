@@ -23,32 +23,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         mapFragment.getMapAsync(this)
     }
 
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
     override fun onMapReady(googleMap: GoogleMap) {
         googleMaps = googleMap
 
         val southern_deck = LatLng(-15.838642, -47.902783)
+
         googleMaps.addMarker(MarkerOptions().position(southern_deck).title("well shit"))
         googleMaps.moveCamera(CameraUpdateFactory.newLatLng(southern_deck))
         googleMaps.moveCamera(CameraUpdateFactory.zoomTo(17f))
     }
 
-//    fun stabilishBluetoothComms() {
-//        val bluetooth : BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter()
-//        if (bluetooth?.isEnabled == false) {
-//            val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-//            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
-//        }
-//
-//
-//
-//    }
 }
