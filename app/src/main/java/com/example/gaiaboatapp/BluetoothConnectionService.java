@@ -8,6 +8,9 @@ import android.content.Context;
 import android.util.Log;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.util.UUID;
 
 public class BluetoothConnectionService {
@@ -19,9 +22,11 @@ public class BluetoothConnectionService {
     private final BluetoothAdapter mBluetoothAdapter;
     
     private UUID deviceUUID;
+    private BluetoothDevice mDevice;
+
     private AcceptThread mInsecureAcceptThread;
     private ConnectThread mConnectThread;
-    private BluetoothDevice mDevice;
+    private ConnectedThread mConnectedThread;
     
     Context mContext;
     ProgressDialog mProgressDialog;
@@ -161,4 +166,69 @@ public class BluetoothConnectionService {
         mConnectThread = new ConnectThread(device, uuid);
         mConnectThread.start();
     }
+
+    // This class assumes that a connection has been made
+    public class ConnectedThread extends Thread {
+        private final BluetoothSocket mSocket;
+        private final InputStream mInputStream;
+        private final OutputStream mOutputStream;
+
+        public ConnectedThread(BluetoothSocket sock) {
+            Log.d(TAG, "ConnectedThread: Starting.");
+
+            mSocket = sock;
+            InputStream tmpIn = null;
+            OutputStream tmpOut = null;
+
+            // dissmiss ProgressDialog
+            mProgressDialog.dismiss();
+
+            try {
+                tmpIn = mSocket.getInputStream();
+                tmpOut = mSocket.getOutputStream();
+            } catch (IOException ie) {
+                ie.printStackTrace();
+            }
+
+            mInputStream = tmpIn;
+            mOutputStream = tmpOut;
+        }
+
+        public void run() {
+            // bytearray object to get the input
+            // TODO: refact
+            byte[] buffer = new byte[1024]; // buffer store for the stream
+            int bytes;  // bytes returned from read()
+
+            // keep listening to input until exception launches
+            while (true) {
+                try {
+                    bytes = mInputStream.read(buffer);
+                    String incomingMessage = new String(buffer, 0, bytes);
+                    Log.d(TAG, "InputStream: " + incomingMessage);
+                } catch (IOException e) {
+                    Log.e(TAG, "write: Error reading from inputstream. " + e.getMessage());
+                    break;    
+                }
+                
+            }
+        }
+
+        public void write(byte[] bytes) {
+            String text = new String(bytes, Charset.defaultCharset());
+            Log.d(TAG, "write: writing to OutputStream: " + text);
+            try {
+                mOutputStream.write(bytes);
+            } catch (IOException e) {
+                Log.e(TAG, "write: Error writing to outputstream. " + e.getMessage());
+            }
+        }
+
+        public void cancel() {
+            try {
+                mSocket.close();
+            } catch (IOException e) { }
+        }
+    }
+
 }
