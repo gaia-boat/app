@@ -23,12 +23,12 @@ public class BluetoothConnectionService {
     private ConnectThread mConnectThread;
     private BluetoothDevice mDevice;
     
-    Context mcontext;
+    Context mContext;
     ProgressDialog mProgressDialog;
 
-    public BluetoothConnectionService(Context mcontext) {
+    public BluetoothConnectionService(Context mContext) {
         this.mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        this.mcontext = mcontext;
+        this.mContext = mContext;
     }
 
     private class AcceptThread extends Thread {
@@ -121,14 +121,44 @@ public class BluetoothConnectionService {
                 Log.d(TAG, "Cancel: closing client socket");
                 mSocket.close();
             } catch (IOException e) {
-                //TODO: handle exception
+               Log.e(TAG, "Cancel: could not close the client socket: " + e.getMessage());
             }
         }
     }
 
+    // lift -> hackathon
+    // seleção de programadores, evento na FIT
+    // banco central, caixa, siscob, ; usp vs unb; 4 alunos; 2º semestre;
+    // dia 10 as 16h no auditorio
+    
     // this is where the chat app begins
     // TODO: change logic to the gaia-boat's app
     public synchronized void start() {
+        Log.d(TAG, "start");
 
+        // cancel all threads that are trying to make an connection.
+        if (mConnectThread != null) {
+            mConnectThread.cancel();
+            mConnectThread = null;
+        }
+
+        // begins an accept thread if there is none
+        if (mInsecureAcceptThread == null) {
+            mInsecureAcceptThread = new AcceptThread();
+            mInsecureAcceptThread.start();
+        }
+    }
+
+    // AcceptThread sits waiting for a connection
+    // Then ConnectThread starts and attempts to make a connection with other device's AcceptThread
+    // TODO: this must be refactorated
+    public void startClient(BluetoothDevice device, UUID uuid) {
+        Log.d(TAG, "startClient: started.");
+        
+        // init ProgressDialog
+        mProgressDialog = ProgressDialog.show(mContext, "Connecting to bluetooth.", "Please wait...", true);
+
+        mConnectThread = new ConnectThread(device, uuid);
+        mConnectThread.start();
     }
 }
