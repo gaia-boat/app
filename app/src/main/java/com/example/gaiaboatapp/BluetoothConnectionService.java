@@ -131,6 +131,7 @@ public class BluetoothConnectionService {
         }
     }
 
+    
     // lift -> hackathon
     // seleção de programadores, evento na FIT
     // banco central, caixa, siscob, ; usp vs unb; 4 alunos; 2º semestre;
@@ -140,20 +141,20 @@ public class BluetoothConnectionService {
     // TODO: change logic to the gaia-boat's app
     public synchronized void start() {
         Log.d(TAG, "start");
-
+        
         // cancel all threads that are trying to make an connection.
         if (mConnectThread != null) {
             mConnectThread.cancel();
             mConnectThread = null;
         }
-
+        
         // begins an accept thread if there is none
         if (mInsecureAcceptThread == null) {
             mInsecureAcceptThread = new AcceptThread();
             mInsecureAcceptThread.start();
         }
     }
-
+    
     // AcceptThread sits waiting for a connection
     // Then ConnectThread starts and attempts to make a connection with other device's AcceptThread
     // TODO: this must be refactorated
@@ -162,44 +163,44 @@ public class BluetoothConnectionService {
         
         // init ProgressDialog
         mProgressDialog = ProgressDialog.show(mContext, "Connecting to bluetooth.", "Please wait...", true);
-
+        
         mConnectThread = new ConnectThread(device, uuid);
         mConnectThread.start();
     }
-
+    
     // This class assumes that a connection has been made
     public class ConnectedThread extends Thread {
         private final BluetoothSocket mSocket;
         private final InputStream mInputStream;
         private final OutputStream mOutputStream;
-
+        
         public ConnectedThread(BluetoothSocket sock) {
             Log.d(TAG, "ConnectedThread: Starting.");
-
+            
             mSocket = sock;
             InputStream tmpIn = null;
             OutputStream tmpOut = null;
-
+            
             // dissmiss ProgressDialog
             mProgressDialog.dismiss();
-
+            
             try {
                 tmpIn = mSocket.getInputStream();
                 tmpOut = mSocket.getOutputStream();
             } catch (IOException ie) {
                 ie.printStackTrace();
             }
-
+            
             mInputStream = tmpIn;
             mOutputStream = tmpOut;
         }
-
+        
         public void run() {
             // bytearray object to get the input
             // TODO: refact
             byte[] buffer = new byte[1024]; // buffer store for the stream
             int bytes;  // bytes returned from read()
-
+            
             // keep listening to input until exception launches
             while (true) {
                 try {
@@ -213,7 +214,7 @@ public class BluetoothConnectionService {
                 
             }
         }
-
+        
         public void write(byte[] bytes) {
             String text = new String(bytes, Charset.defaultCharset());
             Log.d(TAG, "write: writing to OutputStream: " + text);
@@ -223,12 +224,30 @@ public class BluetoothConnectionService {
                 Log.e(TAG, "write: Error writing to outputstream. " + e.getMessage());
             }
         }
-
+        
         public void cancel() {
             try {
                 mSocket.close();
             } catch (IOException e) { }
         }
     }
+    
+    // manages the connection and handles communications
+    // TODO: refact
+    private void connected(BluetoothSocket mSocket, BluetoothDevice mDevice) {
+        Log.d(TAG, "connected: Starting.");
 
+        // start thread to manage the connection and perform transmissions
+        mConnectThread = ConnectThread(mSocket);
+        mConnectThread.start();
+    }
+
+    // write to ConnectedThread in an unsync manner
+    public void write(byte[] out) {
+        // Create temp object
+        ConnectThread r;
+        // sync a cp of the ConnectedThread
+        Log.d(TAG, "write: Write called.");
+        mConnectedThread.write(out);
+    }
 }
