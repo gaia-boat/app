@@ -1,7 +1,9 @@
 // tutorial https://www.youtube.com/watch?v=Fz_GT7VGGaQ
 package com.example.gaiaboatapp;
 
+import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
@@ -31,9 +33,10 @@ public class BluetoothConnectionService {
     Context mContext;
     ProgressDialog mProgressDialog;
 
-    public BluetoothConnectionService(Context mContext) {
-        this.mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        this.mContext = mContext;
+    public BluetoothConnectionService(Context ctx) {
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        mContext = ctx;
+        start();
     }
 
     private class AcceptThread extends Thread {
@@ -104,7 +107,7 @@ public class BluetoothConnectionService {
             } catch (IOException e) {
                 Log.e(TAG, "ConnectThread: could not create a InsecureRfcommSocket " + e.getMessage());
             }
-            mDevice = tmp;
+            mSocket = tmp;
             mBluetoothAdapter.cancelDiscovery();
             try {
                 mSocket.connect();
@@ -169,7 +172,7 @@ public class BluetoothConnectionService {
     }
     
     // This class assumes that a connection has been made
-    public class ConnectedThread extends Thread {
+    public class ConnectedThread  extends Thread {
         private final BluetoothSocket mSocket;
         private final InputStream mInputStream;
         private final OutputStream mOutputStream;
@@ -231,16 +234,6 @@ public class BluetoothConnectionService {
             } catch (IOException e) { }
         }
     }
-    
-    // manages the connection and handles communications
-    // TODO: refact
-    private void connected(BluetoothSocket mSocket, BluetoothDevice mDevice) {
-        Log.d(TAG, "connected: Starting.");
-
-        // start thread to manage the connection and perform transmissions
-        mConnectThread = ConnectThread(mSocket);
-        mConnectThread.start();
-    }
 
     // write to ConnectedThread in an unsync manner
     public void write(byte[] out) {
@@ -249,5 +242,15 @@ public class BluetoothConnectionService {
         // sync a cp of the ConnectedThread
         Log.d(TAG, "write: Write called.");
         mConnectedThread.write(out);
+    }
+
+    // manages the connection and handles communications
+    // TODO: refact and fix this
+    private void connected(BluetoothSocket mSocket, BluetoothDevice mDevice) {
+        Log.d(TAG, "connected: Starting.");
+
+        // start thread to manage the connection and perform transmissions
+        mConnectedThread = new ConnectedThread(mSocket);
+        mConnectedThread.start();
     }
 }
