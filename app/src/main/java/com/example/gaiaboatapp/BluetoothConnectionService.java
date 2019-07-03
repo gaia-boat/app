@@ -17,7 +17,7 @@ import java.util.UUID;
 
 public class BluetoothConnectionService {
     private static final String TAG = "BluetoothConnectionServ";
-    private static final UUID MY_UUID_SECURE = UUID.fromString("8ce255-200a-11e0-ac64-0800200c9a66");
+    // private static final UUID MY_UUID_SECURE = UUID.fromString("8ce255-200a-11e0-ac64-0800200c9a66");
     private static final UUID MY_UUID_INSECURE = UUID.fromString("8ce255-200a-11e0-ac64-0800200c9a66");
     private static final String appName = "MYAPP";
     
@@ -92,6 +92,7 @@ public class BluetoothConnectionService {
 
         public ConnectThread(BluetoothDevice device, UUID uuid) {
             Log.d(TAG, "ConnectThread: started...");
+            Log.d(TAG, "AQUI PORRA: device -> " + "uuid -> " + uuid);
             mDevice = device;
             deviceUUID = uuid;    
         }
@@ -200,7 +201,6 @@ public class BluetoothConnectionService {
         
         public void run() {
             // bytearray object to get the input
-            // TODO: refact
             byte[] buffer = new byte[1024]; // buffer store for the stream
             int bytes;  // bytes returned from read()
             
@@ -208,10 +208,14 @@ public class BluetoothConnectionService {
             while (true) {
                 try {
                     bytes = mInputStream.read(buffer);
+                    
+                    Log.d(TAG, "run: Recieved in buffer: " + buffer + " bytes: " + bytes);
+                    
                     String incomingMessage = new String(buffer, 0, bytes);
+                    
                     Log.d(TAG, "InputStream: " + incomingMessage);
                 } catch (IOException e) {
-                    Log.e(TAG, "write: Error reading from inputstream. " + e.getMessage());
+                    Log.e(TAG, "run: Error reading from inputstream. " + e.getMessage());
                     break;    
                 }
                 

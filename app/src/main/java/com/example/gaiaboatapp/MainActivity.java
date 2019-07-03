@@ -183,7 +183,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         btnSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                byte[] bytes = etSend.getText().toString().getBytes(Charset.defaultCharset());
+                // byte[] bytes = etSend.getText().toString().getBytes(Charset.defaultCharset());
+                byte[] bytes = "S".getBytes(Charset.defaultCharset());
+
                 mBluetoothConnection.write(bytes);
             }
         });
