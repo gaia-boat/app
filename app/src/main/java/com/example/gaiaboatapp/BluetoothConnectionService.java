@@ -62,7 +62,7 @@ public class BluetoothConnectionService {
             // exception is caught.
             Log.d(TAG, "run: RFCOM server socket start...");
             try {
-                socket = mServerSocket.accept(5000);
+                socket = mServerSocket.accept(10000);
                 Log.d(TAG, "run: RFCOM server socket accepted connection!");
             } catch (IOException e) {
                 e.printStackTrace();
@@ -179,7 +179,7 @@ public class BluetoothConnectionService {
         private final OutputStream mOutputStream;
         
         public ConnectedThread(BluetoothSocket sock) {
-            Log.d(TAG, "ConnectedThread: Starting.");
+            Log.d(TAG, "ConnectedThread: Started.");
             
             mSocket = sock;
             InputStream tmpIn = null;

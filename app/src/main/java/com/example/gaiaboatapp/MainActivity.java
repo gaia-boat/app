@@ -226,10 +226,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     public void btnEnableDisable_Discoverable(View view) {
-        Log.d(TAG, "btnEnableDisable_Discoverable: Making device discoverable for 300 seconds.");
+        Log.d(TAG, "btnEnableDisable_Discoverable: Making device discoverable for 800 seconds.");
 
         Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-        discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
+        discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 800);
         startActivity(discoverableIntent);
 
         IntentFilter intentFilter = new IntentFilter(mBluetoothAdapter.ACTION_SCAN_MODE_CHANGED);
@@ -305,6 +305,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         mBTDevices.get(i).createBond();
 
         mBTDevice = mBTDevices.get(i);
+        Log.d(TAG, "onItemClick: dosajfiodsjdsjaioadjiasjfoidjs");
         mBluetoothConnection = new BluetoothConnectionService(MainActivity.this);
     }
 }
