@@ -46,12 +46,12 @@ public class BluetoothConnectionService {
         this.mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         this.mContext = ctx;
         this.found_devices = new ArrayList<String>();
+        this.searchAndConnectToBTModuleThread.start();
         start();
 //        if (!this.mBluetoothAdapter.isEnabled()) {
 //            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
 //            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
 //        }
-        this.searchAndConnectToBTModuleThread.start();
     }
 
     public synchronized void start() {
