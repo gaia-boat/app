@@ -1,4 +1,4 @@
-package com.example.gaiaboatapp;
+package com.example.gaiaapp;
 
 import org.junit.Test;
 

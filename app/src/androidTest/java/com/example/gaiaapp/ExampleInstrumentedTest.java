@@ -1,4 +1,4 @@
-package com.example.gaiaboatapp;
+package com.example.gaiaapp;
 
 import android.content.Context;
 import androidx.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("com.example.gaiaboatapp", appContext.getPackageName());
+        assertEquals("com.example.gaiaapp", appContext.getPackageName());
     }
 }
