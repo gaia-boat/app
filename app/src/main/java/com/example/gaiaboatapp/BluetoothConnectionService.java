@@ -53,11 +53,18 @@ public class BluetoothConnectionService {
         if (this.searchAndConnectToBTModuleThread != null)
             this.searchAndConnectToBTModuleThread.interrupt();
 
-        Log.d(TAG, "start: SOCKET IS -> " + this.socket);
-
         this.communicationThread = new CommunicationThread(this.socket);
         this.communicationThread.start();
     }
+
+//    private class ServerThread extends Thread {
+//
+//
+//        @Override
+//        public void run() {
+//
+//        }
+//    }
 
     private class SearchAndConnectToBTModuleThread extends Thread {
         // HC-05
@@ -65,6 +72,16 @@ public class BluetoothConnectionService {
 
         @Override
         public void run() {
+//            BluetoothDevice dev;
+//            dev = mBluetoothAdapter.getRemoteDevice("");
+//            try {
+//                BluetoothSocket a = dev.createRfcommSocketToServiceRecord(MY_UUID_INSECURE);
+//                a.connect();
+//                Log.d(TAG, "run: deu bom pow");
+//            } catch (IOException e) {
+//                communicationThread.cancelConnection();
+//                e.printStackTrace();
+//            }
             Log.d(TAG, "run: Starting search and connect thread");
             super.run();
             Log.d(TAG, "run: getting bonded devices");
@@ -73,7 +90,8 @@ public class BluetoothConnectionService {
 
             for (BluetoothDevice bt : paired_devices) {
                 Log.d(TAG, "run: " + bt.getName());
-                if (bt.getName() == "HC-05") {
+
+                if (bt.getName().equals("Nukdown")) {
                     Log.d(TAG, "run: device HC-05 found with nº: " + bt.getAddress());
                     mDevice = bt;
                     break;
@@ -84,6 +102,8 @@ public class BluetoothConnectionService {
                 Log.d(TAG, "run: Device is named: " + mDevice.getName());
                 try {
                     socket = mDevice.createRfcommSocketToServiceRecord(MY_UUID_INSECURE);
+                    Log.d(TAG, "start: SOCKET IS -> " + socket);
+
                 } catch (IOException e) {
                     Log.e(TAG, "run: Failed to create a comms socket! " + e.getMessage());
                 }
@@ -122,25 +142,43 @@ public class BluetoothConnectionService {
     }
 
     private class CommunicationThread extends Thread {
-        private BluetoothSocket socket;
+        private BluetoothSocket s;
         private InputStream recievedMessage;
         private OutputStream sendMessage;
         private byte[] buffer;
 
         public CommunicationThread(BluetoothSocket bts) {
-            this.socket = bts;
+            while(true) {
+                Log.d(TAG, "CommunicationThread: sleep...");
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                if (searchAndConnectToBTModuleThread.isConnectionSuccessful())
+                    break;
+            }
+
+            Log.d(TAG, "CommunicationThread: Initializing communication thread...");
+
+            s = bts;
+            
+            Log.d(TAG, "CommunicationThread: Initializing variables...");
             InputStream tmpIn = null;
             OutputStream tmpOut = null;
 
             try {
-                tmpIn = socket.getInputStream();
+                Log.d(TAG, "CommunicationThread: trying to read from tmpIn");
+                tmpIn = s.getInputStream();
             } catch (IOException e) {
+                searchAndConnectToBTModuleThread.interrupt();
                 e.printStackTrace();
             }
 
             try {
-                tmpOut = socket.getOutputStream();
+                tmpOut = s.getOutputStream();
             } catch (IOException e) {
+                searchAndConnectToBTModuleThread.interrupt();
                 e.printStackTrace();
             }
 
@@ -149,6 +187,7 @@ public class BluetoothConnectionService {
         }
 
         public void run() {
+            Log.d(TAG, "run: Starting communication thread run method...");
             while (true) {
 //                SystemClock.sleep(1000);
                 Log.d(TAG, "run: waiting for a connection to be stablished...");
